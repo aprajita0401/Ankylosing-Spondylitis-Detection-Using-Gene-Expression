@@ -1,6 +1,4 @@
-fastapi
-uvicorn
-scikit-learn
+gradio>=3.0
 joblib
 numpy
-pandas
+scikit-learn
