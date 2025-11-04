@@ -155,12 +155,5 @@ console.log(result.prediction, result.probability);
 
 ## License
 
-- This project is for research and academic use only.
-- For clinical or production applications, independent validation is required.
-
-
-
-
-
-
-
+This project is for research and academic use only.
+For clinical or production applications, independent validation is required.
