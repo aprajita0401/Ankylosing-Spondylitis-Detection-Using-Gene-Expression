@@ -1,18 +1,29 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+# app.py
 import joblib
 import numpy as np
+import gradio as gr
 
-model = joblib.load('../version 2/hybrid_model.joblib') # path to latest model
+# Load model (model is in repo root)
+model = joblib.load("hybrid_model.joblib")
 
-app = FastAPI()
+def predict(features):
+    # features will be a list of numbers from the UI
+    X = np.array(features).reshape(1, -1)
+    pred = model.predict(X)[0]
+    proba = None
+    if hasattr(model, "predict_proba"):
+        proba = float(model.predict_proba(X)[0, 1])
+    return {"prediction": int(pred), "probability": proba}
 
-class Features(BaseModel):
-    features: list  # the same length as model's expected input
+# Build Gradio UI (adapt inputs to your model)
+inputs = []
+# Example: if model expects 4 numeric features
+for i in range(4):
+    inputs.append(gr.Number(label=f"feature_{i+1}"))
 
-@app.post("/predict")
-def predict(data: Features):
-    x = np.array(data.features).reshape(1, -1)
-    pred = model.predict(x)[0]
-    proba = model.predict_proba(x)[0,1]
-    return {"prediction": int(pred), "probability": float(proba)}
+output = gr.JSON(label="Result")
+
+iface = gr.Interface(fn=predict, inputs=inputs, outputs=output, title="Hybrid Model Predictor")
+
+if __name__ == "__main__":
+    iface.launch()
