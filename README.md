@@ -1,11 +1,17 @@
-# AS_FINAL: Gene Expression Classification for Ankylosing Spondylitis (AS)
+# Ankylosing Spondylitis (AS) Detection Using Gene Expression 
 
-## Overview
-This repository provides a complete machine learning pipeline to classify patients as having Ankylosing Spondylitis (AS) or being healthy controls using gene expression data. It covers preprocessing (cleaning, imputation, normalization, consistency checks), model training (Random Forest and Hybrid Random Forest + Multi-Layer Perceptron), and deployment via FastAPI.
+## Abstract
+
+This project presents a machine learning-based pipeline for the classification of Ankylosing Spondylitis (AS) patients using gene expression profiles. Two datasets were used: one containing cleaned and normalized gene expression data from AS patients, and the other from healthy controls. Data preparation involved systematic removal of non-informative columns, mean imputation for missing values, consistency and verification of gene identifiers, and feature normalization using z-score scaling. Stratified sampling and SMOTE oversampling were implemented to address class imbalance and ensure robust model training.
+
+Two modeling approaches were developed: Version 1 utilizes a Random Forest classifier with balanced class weights, while Version 2 introduces a hybrid model combining Random Forest with Multi-Layer Perceptron (MLP) through ensemble soft voting. The hybrid model achieved strong performance, with validation and test accuracies of 0.95 and 0.96, respectively, and perfect ROC-AUC scores of 1.0, indicating excellent separability of AS and control samples. The pipeline is production-ready with backend API deployment via FastAPI and seamless integration with web frontends (e.g., Vercel).
+
+This work demonstrates that rigorous data cleaning, normalization, and careful model selection can produce highly accurate gene expression classifiers, facilitating translational research into the diagnosis and molecular understanding of Ankylosing Spondylitis.
 
 ---
 
 ## File Structure
+```
 AS_FINAL/
 ├── dataset/ # Raw and processed gene expression datasets
 ├── dataset preparation/ # Scripts for cleaning, verification, normalization
@@ -22,7 +28,7 @@ AS_FINAL/
 ├── app.py # FastAPI backend for predictions
 ├── requirements.txt # Python dependencies
 └── ...
-
+```
 
 ---
 
@@ -52,8 +58,6 @@ Scripts in `/dataset preparation/` execute the full data pipeline:
 6. **6_gene_consistency.py** – Checks probe/gene ID consistency.  
 7. **7_normalised.py** – Applies z-score normalization.  
 8. **8_normalization_verification.py** – Validates normalization metrics.
-
-> **SMOTE** is applied during training to balance AS vs. control samples.
 
 ---
 
@@ -92,28 +96,30 @@ The hybrid model demonstrates near-perfect separation between AS and control cla
 ## Deployment
 
 ### Backend
+
 - FastAPI service (`app.py`) loads `version 2/hybrid_model.joblib`.  
 - Endpoint: `/predict` (POST) for classification requests.
 
 **Example Request:**
 ```json
 {
-  "features": [1.1, 2.2, 3.3, ...]
+  "features": [1.1, 2.2, 3.3]
 }
-Example Response:
-
+```
+**Example Response:**
+```json
 {
   "prediction": "AS",
   "probability": 0.95
 }
-Frontend
+```
+### Frontend
 
-Deployed via Vercel (Next.js / React).
+- Deployed via Vercel (Next.js / React).
+- Sends POST requests to the backend for live predictions.
 
-Sends POST requests to the backend for live predictions.
-
-Example (JavaScript):
-
+**Example (JavaScript):**
+```javascript
 const response = await fetch("https://your-backend-domain/predict", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
@@ -121,30 +127,40 @@ const response = await fetch("https://your-backend-domain/predict", {
 });
 const result = await response.json();
 console.log(result.prediction, result.probability);
+```
+
+---
 
 ## Requirements
 
-Listed in requirements.txt:
+**Listed in requirements.txt:**
 
-fastapi
-uvicorn
-scikit-learn
-joblib
-numpy
+- fastapi
+- uvicorn
+- scikit-learn
+- joblib
+- numpy
+
+---
 
 ## Quick Start
 
-Run preprocessing scripts from /dataset preparation/ in sequence.
+- Run preprocessing scripts from /dataset preparation/ in sequence.
+- Train models using scripts in /version 1/ or /version 2/.
+- Save final model as hybrid_model.joblib in /version 2/.
+- Deploy FastAPI backend with app.py.
+- Connect frontend to /predict endpoint for real-time inference.
 
-Train models using scripts in /version 1/ or /version 2/.
-
-Save final model as hybrid_model.joblib in /version 2/.
-
-Deploy FastAPI backend with app.py.
-
-Connect frontend to /predict endpoint for real-time inference.
+---
 
 ## License
 
-This project is for research and academic use only.
-For clinical or production applications, independent validation is required.
+- This project is for research and academic use only.
+- For clinical or production applications, independent validation is required.
+
+
+
+
+
+
+
