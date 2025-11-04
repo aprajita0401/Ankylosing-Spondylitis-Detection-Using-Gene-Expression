@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import joblib
 import numpy as np
 
-model = joblib.load('./version 2/hybrid_model.joblib') # path to latest model
+model = joblib.load('../version 2/hybrid_model.joblib') # path to latest model
 
 app = FastAPI()
 
