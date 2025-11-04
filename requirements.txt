@@ -1,5 +1,6 @@
-streamlit>=1.20
-joblib
-numpy
+streamlit
 scikit-learn
 pandas
+numpy
+openpyxl
+joblib
