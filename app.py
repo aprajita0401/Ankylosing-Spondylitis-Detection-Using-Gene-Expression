@@ -1,29 +1,50 @@
-# app.py
+import streamlit as st
 import joblib
 import numpy as np
-import gradio as gr
+import os
 
-# Load model (model is in repo root)
-model = joblib.load("hybrid_model.joblib")
+st.set_page_config(page_title="Hybrid Model Predictor", layout="centered")
 
-def predict(features):
-    # features will be a list of numbers from the UI
-    X = np.array(features).reshape(1, -1)
-    pred = model.predict(X)[0]
-    proba = None
-    if hasattr(model, "predict_proba"):
-        proba = float(model.predict_proba(X)[0, 1])
-    return {"prediction": int(pred), "probability": proba}
+st.title("Hybrid Model Predictor")
 
-# Build Gradio UI (adapt inputs to your model)
+# Adjust this to your model input size
+NUM_FEATURES = 4
+FEATURE_LABELS = [f"feature_{i+1}" for i in range(NUM_FEATURES)]
+
+MODEL_FILENAME = "hybrid_model.joblib"
+
+@st.cache_resource(show_spinner=False)
+def load_model(path=MODEL_FILENAME):
+    if not os.path.exists(path):
+        st.error(f"Model file not found at {path}. Make sure it's in the repo root.")
+        raise FileNotFoundError(path)
+    model = joblib.load(path)
+    return model
+
+model = None
+try:
+    model = load_model()
+except Exception as e:
+    st.stop()
+
+# Build inputs
+st.write("Enter feature values (numeric).")
+cols = st.columns(NUM_FEATURES)
 inputs = []
-# Example: if model expects 4 numeric features
-for i in range(4):
-    inputs.append(gr.Number(label=f"feature_{i+1}"))
+for i, col in enumerate(cols):
+    val = col.number_input(FEATURE_LABELS[i], value=0.0, format="%.6f")
+    inputs.append(val)
 
-output = gr.JSON(label="Result")
-
-iface = gr.Interface(fn=predict, inputs=inputs, outputs=output, title="Hybrid Model Predictor")
-
-if __name__ == "__main__":
-    iface.launch()
+if st.button("Predict"):
+    X = np.array(inputs).reshape(1, -1)
+    try:
+        pred = model.predict(X)[0]
+        proba = None
+        if hasattr(model, "predict_proba"):
+            proba = float(model.predict_proba(X)[0, 1])
+        st.success(f"Prediction: {int(pred)}")
+        if proba is not None:
+            st.info(f"Predicted probability (class 1): {proba:.4f}")
+    except Exception as e:
+        st.error(f"Error during prediction: {e}")
+        raise
